@@ -1,0 +1,652 @@
+<title>Power System Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a vertical "busbar" runs down the left like a single-line diagram; each phase is a node on it. Content column on the right. Stacks to one column on phones. */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --ink:#1b2328; --muted:#5b6870; --rule:#d5dce0;
+  --accent:#8a4b1f;            /* L1 brown (IEC 60445) */
+  --accent-soft:#f2e6dc;
+  --l2:#1b2328;                /* L2 black */
+  --l3:#8d979d;                /* L3 grey */
+  --check:#1f6b4f; --check-soft:#dff0e8;
+  --font-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --font-body:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171a; --surface:#1a2125; --ink:#e3e8ea; --muted:#9aa6ac; --rule:#2c363b;
+    --accent:#d9925c; --accent-soft:#3a2a1e; --l2:#e3e8ea; --l3:#6f7a80;
+    --check:#7fd0ac; --check-soft:#183229; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171a; --surface:#1a2125; --ink:#e3e8ea; --muted:#9aa6ac; --rule:#2c363b;
+  --accent:#d9925c; --accent-soft:#3a2a1e; --l2:#e3e8ea; --l3:#6f7a80;
+  --check:#7fd0ac; --check-soft:#183229; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--font-display);text-wrap:balance;line-height:1.15;margin:0}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* Header */
+.phases-bar{display:grid;gap:3px;margin-top:28px}
+.phases-bar span{display:block;height:3px;border-radius:2px}
+.phases-bar span:nth-child(1){background:var(--accent)}
+.phases-bar span:nth-child(2){background:var(--l2)}
+.phases-bar span:nth-child(3){background:var(--l3)}
+header.top{padding-block:28px 32px;display:grid;gap:18px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;font-stretch:80%;letter-spacing:-.01em}
+.lede{max-width:66ch;font-size:1.08rem;color:var(--muted);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--font-mono);font-size:12.5px;padding:4px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--surface)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-block;font-weight:600;font-size:14px;padding:9px 16px;border-radius:6px;text-decoration:none;border:1px solid var(--accent);color:var(--accent);background:transparent}
+.btn.primary{background:var(--accent);color:var(--surface)}
+
+/* Main grid */
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;align-items:start}
+nav.bus{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);padding-block:8px}
+nav.bus ol{list-style:none;margin:0;padding:0 0 0 18px;border-left:4px solid var(--l2);display:grid;gap:4px}
+nav.bus li{position:relative}
+nav.bus li::before{content:"";position:absolute;left:-26px;top:11px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:3px solid var(--l2)}
+nav.bus li.proj::before{background:var(--accent);border-color:var(--accent)}
+nav.bus a{display:block;text-decoration:none;color:var(--ink);font-size:14px;padding:5px 6px;border-radius:4px}
+nav.bus a:hover{background:var(--surface)}
+nav.bus .wk{display:block;font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.progress{margin:18px 0 0;display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.meter{height:6px;background:var(--rule);border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--check);transition:width .3s}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+
+main{min-width:0;display:grid;gap:56px}
+section{min-width:0}
+.sec-head{display:grid;gap:8px;padding-bottom:14px;border-bottom:2px solid var(--ink);margin-bottom:22px}
+.sec-head h2{font-size:clamp(1.6rem,3.6vw,2.2rem);font-weight:750;font-stretch:85%}
+.sec-head .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--font-mono);font-size:12.5px;color:var(--muted)}
+.outcome{margin:0;max-width:70ch}
+.outcome b{color:var(--accent)}
+.reading{font-size:14px;color:var(--muted);margin:6px 0 0}
+
+/* Steps */
+.steps{display:grid;gap:14px}
+.step{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;display:grid;gap:10px;min-width:0}
+.step.star{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.step-top{display:flex;gap:12px;align-items:flex-start}
+.step-top input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--check);flex:none}
+.step h3{font-size:1.15rem;font-weight:700;font-stretch:90%}
+.step h3 .no{font-family:var(--font-mono);font-weight:500;color:var(--muted);margin-right:6px;font-size:.85em}
+.step .hrs{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap;margin-left:auto}
+.step p{margin:0}
+.kv{display:grid;grid-template-columns:88px minmax(0,1fr);gap:6px 14px;font-size:15px}
+.kv dt{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.kv dd{margin:0;min-width:0}
+.kv ol,.kv ul{margin:0;padding-left:20px;display:grid;gap:3px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.ck{font-family:var(--font-mono);font-size:12.5px;background:var(--check-soft);color:var(--check);padding:2px 8px;border-radius:4px}
+.trap{font-size:14px;color:var(--muted)}
+.trap b{color:var(--ink)}
+.formula{font-family:var(--font-mono);font-size:14px;background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;overflow-x:auto;white-space:nowrap}
+
+/* Project deliverable block */
+.project{border:2px solid var(--accent);border-radius:8px;padding:18px 20px;display:grid;gap:10px;background:var(--accent-soft)}
+.project h3{font-size:1.2rem;font-weight:750;font-stretch:90%}
+.tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:500}
+
+/* Tables */
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;display:grid;gap:6px;align-content:start}
+.card h4{font-size:1rem;font-weight:700}
+.card p{margin:0;font-size:14.5px;color:var(--muted)}
+
+.qs{columns:2 300px;column-gap:32px;margin:0;padding-left:22px}
+.qs li{break-inside:avoid;margin-bottom:6px}
+
+.refs h3{font-size:1.1rem;margin:26px 0 10px;font-weight:700}
+.refs ul{margin:0;padding-left:20px;display:grid;gap:7px;font-size:14.5px}
+.code{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:500}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:24px}
+  nav.bus{position:static}
+  nav.bus ol{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));border-left:0;padding-left:0;gap:6px}
+  nav.bus li::before{display:none}
+  nav.bus a{background:var(--surface);border:1px solid var(--rule)}
+  .kv{grid-template-columns:minmax(0,1fr)}
+  .kv dt{padding-top:6px}
+}
+</style>
+
+<div class="wrap">
+  <div class="phases-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+  <header class="top">
+    <div class="eyebrow">Self-study course · IEC · 230/400 V · 50 Hz</div>
+    <h1>Power System Basics</h1>
+    <p class="lede">A guided 26-week course from AC fundamentals to a junior power systems engineer portfolio. Every step tells you what to read, what to do, what file to produce, and the numbers to check yourself against. Written for an engineer from another field with some Python and 10–12 hours a week.</p>
+    <div class="chips">
+      <span class="chip">26 weeks</span><span class="chip">10–12 h / week</span><span class="chip">DIgSILENT PowerFactory</span><span class="chip">Python · pandapower</span><span class="chip">PSCAD</span><span class="chip">MATLAB</span>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/Taio11k/Power-System-Basics">Course files on GitHub</a>
+      <a class="btn" href="#phase-0">Start at Phase 0</a>
+      <a class="btn" href="#references">References</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="bus" aria-label="Course phases">
+      <ol>
+        <li><a href="#goal">End goal<span class="wk">what "finished" means</span></a></li>
+        <li><a href="#method">How it works<span class="wk">step format, rhythm</span></a></li>
+        <li><a href="#phase-0">0 · Setup<span class="wk">week 1</span></a></li>
+        <li><a href="#phase-1">1 · AC fundamentals<span class="wk">weeks 2–4</span></a></li>
+        <li><a href="#phase-2">2 · Components &amp; per-unit<span class="wk">weeks 5–7</span></a></li>
+        <li class="proj"><a href="#phase-3">3 · Power flow → P1<span class="wk">weeks 8–10</span></a></li>
+        <li class="proj"><a href="#phase-4">4 · Short circuit → P2<span class="wk">weeks 11–13</span></a></li>
+        <li class="proj"><a href="#phase-5">5 · Protection → P3<span class="wk">weeks 14–16</span></a></li>
+        <li class="proj"><a href="#phase-6">6 · Solar &amp; DER → P4<span class="wk">weeks 17–19</span></a></li>
+        <li class="proj"><a href="#phase-7">7 · Stability &amp; EMT → P5<span class="wk">weeks 20–22</span></a></li>
+        <li class="proj"><a href="#phase-8">8 · Capstone<span class="wk">weeks 23–26</span></a></li>
+        <li><a href="#interview">Interview prep<span class="wk">18 questions</span></a></li>
+        <li><a href="#references">References<span class="wk">verified sources</span></a></li>
+      </ol>
+      <div class="progress" aria-live="polite">
+        <span id="progress-label">0 of 0 steps done</span>
+        <div class="meter"><i id="progress-fill"></i></div>
+        <span>Ticks are saved in this browser only.</span>
+      </div>
+    </nav>
+
+    <main>
+      <!-- GOAL -->
+      <section id="goal">
+        <div class="sec-head">
+          <h2>The end goal</h2>
+          <p class="outcome">A public GitHub portfolio with <b>5 study projects and 1 capstone</b>. Each one has scripts that reproduce every number and a short report written like a consultancy study.</p>
+        </div>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>#</th><th>Project</th><th>Tools</th><th>Real job equivalent</th></tr></thead>
+            <tbody>
+              <tr><td class="num">P1</td><td>Load flow and N-1 contingency study (9-bus transmission system)</td><td>PowerFactory, pandapower</td><td>Network planning study</td></tr>
+              <tr><td class="num">P2</td><td>IEC 60909 short-circuit study (CIGRE MV network)</td><td>PowerFactory, pandapower</td><td>Fault level and switchgear rating check</td></tr>
+              <tr><td class="num">P3</td><td>Overcurrent protection coordination (radial MV feeder)</td><td>Python TCC tool, PowerFactory or pandapower</td><td>Protection setting study</td></tr>
+              <tr><td class="num">P4</td><td>PV hosting capacity with time series (CIGRE MV/LV)</td><td>pandapower time series, PowerFactory quasi-dynamic</td><td>DER and distribution planning study</td></tr>
+              <tr><td class="num">P5</td><td>Transient stability: critical clearing time (9-bus) plus an EMT demo</td><td>PowerFactory RMS + Python API, PSCAD</td><td>Dynamic study</td></tr>
+              <tr><td class="num">★</td><td><b>Capstone:</b> grid connection study for a solar PV + battery plant, automated with Python, with a consultancy-style PDF report</td><td>All of the above</td><td>The work graduate power systems engineers are hired for</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin:14px 0 0;max-width:70ch">In an interview you can then say: "I ran load flow, N-1, IEC 60909 short circuit, protection coordination, hosting capacity and transient stability studies in PowerFactory, automated them with Python, and cross-validated them in pandapower. Here are the reports." That matches what graduate job postings ask for.</p>
+      </section>
+
+      <!-- METHOD -->
+      <section id="method">
+        <div class="sec-head">
+          <h2>How the course works</h2>
+          <p class="outcome">Do the phases in order; each one depends on the last. Every step has the same parts.</p>
+        </div>
+        <div class="grid2">
+          <div class="card"><h4>Objective</h4><p>What you will be able to do after the step.</p></div>
+          <div class="card"><h4>Learn</h4><p>Exactly which chapters, notes or docs to read. Reference codes like [GLOVER] are listed at the bottom.</p></div>
+          <div class="card"><h4>Do</h4><p>Numbered actions. Follow them literally.</p></div>
+          <div class="card"><h4>Check</h4><p>Worked answers to check yourself against, plus a self-check. Move on only when all of it is true.</p></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="card"><h4>Weekly rhythm (10–12 h)</h4><p>2 × 2 h reading with pen and paper · 2 × 2–3 h coding and simulation · 1 × 1 h writing up your log and project README.</p></div>
+          <div class="card"><h4>The validation rule</h4><p>Never trust one tool. Check every number at least two ways: by hand, in Python, and in PowerFactory. Senior engineers value this habit above all.</p></div>
+          <div class="card"><h4>When stuck for 45 minutes</h4><p>Write down what you expected versus what you got, re-read the step's traps, then ask with that note.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 0 -->
+      <section id="phase-0">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 0</div>
+          <h2>Setup and orientation</h2>
+          <div class="meta"><span>Week 1</span><span>about 10 h</span></div>
+          <p class="outcome">Every tool works, your portfolio repo exists, and you know exactly which job you are training for.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s0-1" aria-label="Mark step 0.1 done"><h3><span class="no">0.1</span>Read 10 real job postings</h3><span class="hrs">1.5 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Search LinkedIn or Indeed for "graduate power systems engineer", "power system studies engineer", "grid connection engineer", "junior protection engineer".</li><li>Copy 10 postings into <code>career/job-postings.md</code>. For each, note the tools, the study types and the standards named.</li><li>Count how often each appears and make a top-10 table.</li></ol></dd>
+            <dt>Done when</dt><dd>You can name the 3 most requested tools and the 3 most requested study types in your market.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s0-2" aria-label="Mark step 0.2 done"><h3><span class="no">0.2</span>Python environment</h3><span class="hrs">2 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Install a recent Python 3 and VS Code with the Python and Jupyter extensions.</li><li>Create a virtual environment and run <code>pip install pandapower numpy pandas matplotlib jupyter openpyxl</code>.</li><li>Run the pandapower minimal example: 20 kV grid → 0.4 MVA 20/0.4 kV transformer → 100 m NAYY 4x50 SE cable → 100 kW + 50 kvar load, then <code>pp.runpp(net)</code>.</li></ol></dd>
+            <dt>Done when</dt><dd><code>net.res_bus</code> prints three voltages close to 1.0 p.u.</dd></dl>
+            <p class="trap"><b>Trap:</b> installing into the global Python instead of the virtual environment.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s0-3" aria-label="Mark step 0.3 done"><h3><span class="no">0.3</span>Git and GitHub portfolio repo</h3><span class="hrs">1 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd>Create a public repo <code>power-systems-portfolio</code> with folders for P1–P5 and the capstone, plus a <code>.gitignore</code> for <code>.venv/</code> and large exports.</dd>
+            <dt>Done when</dt><dd>The repo is public with the folder skeleton.</dd></dl>
+            <p class="trap"><b>Trap:</b> never upload textbook scans, IEC standard text or licence files. Your own models and results are fine.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s0-4" aria-label="Mark step 0.4 done"><h3><span class="no">0.4</span>Check your licences</h3><span class="hrs">2 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li><b>PowerFactory:</b> note the maximum node (bus) count and which modules you have: load flow, short circuit, protection, RMS simulation, quasi-dynamic, contingency, Python. Open Help → Tutorial and the Examples window.</li><li><b>PSCAD:</b> run "My First Simulation" and set up the Fortran compiler now.</li><li><b>MATLAB:</b> note whether you have Simulink and Simscape Electrical.</li></ol></dd>
+            <dt>Done when</dt><dd>You know whether protection and RMS simulation are licensed (Phases 5 and 7 have a fallback if not), and PSCAD produced a plot.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s0-5" aria-label="Mark step 0.5 done"><h3><span class="no">0.5</span>The big picture in one day</h3><span class="hrs">3 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 1 and Ch. 7 (skim) · [GLOVER] Ch. 1.</dd>
+            <dt>Do</dt><dd>Hand-draw a single-line diagram from power plant to house with voltage levels. Start <code>GLOSSARY.md</code> (20 terms) and <code>LOG.md</code> (one line per session).</dd>
+            <dt>Done when</dt><dd>You can explain why transmission voltage is stepped up (losses ∝ I²R) and what 230/400 V means.</dd></dl></article>
+        </div>
+      </section>
+
+      <!-- PHASE 1 -->
+      <section id="phase-1">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 1</div>
+          <h2>AC and three-phase fundamentals</h2>
+          <div class="meta"><span>Weeks 2–4</span><span>about 32 h</span></div>
+          <p class="outcome">Solve any balanced AC circuit with phasors, compute P, Q, S and power factor, and convert line and phase quantities, by hand and in Python.</p>
+          <p class="reading">Main reading: [GLOVER] Ch. 2 · [VONMEIER] Ch. 3–4 · [MIT] Ch. 1–3</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s1-1" aria-label="Mark step 1.1 done"><h3><span class="no">1.1</span>Phasors and impedance</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 3 (first part) · [GLOVER] Ch. 2: Phasors, Network Equations. Redo every example by hand.</dd>
+            <dt>Do</dt><dd>230 V, 50 Hz source with R = 10 Ω in series with L = 31.83 mH. Compute X<sub>L</sub>, Z and I in Python with complex numbers, then plot v(t) and i(t). Repeat with a capacitor (X<sub>C</sub> = 10 Ω).</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">X_L ≈ 10.0 Ω</span><span class="ck">Z ≈ 14.14∠45° Ω</span><span class="ck">I ≈ 16.26 A ∠−45°</span></dd></dl>
+            <p class="trap"><b>Trap:</b> peak vs RMS (power engineers use RMS); <code>cmath</code> works in radians.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s1-2" aria-label="Mark step 1.2 done"><h3><span class="no">1.2</span>Complex power, P, Q and power factor</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 3 (rest) · [GLOVER] Ch. 2: Instantaneous Power, Complex Power.</dd>
+            <dt>Key idea</dt><dd><div class="formula">S = V · I* = P + jQ     pf = cos φ = P / |S|</div></dd>
+            <dt>Do</dt><dd><ol><li>Write <code>complex_power(V, I)</code> and apply it to the Step 1.1 circuit.</li><li>Size the capacitor that corrects a 100 kW load from pf 0.8 to 0.95.</li></ol></dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">P ≈ 2645 W</span><span class="ck">Q ≈ 2645 var</span><span class="ck">|S| ≈ 3740 VA</span><span class="ck">Q_C ≈ 42.1 kvar</span></dd></dl>
+            <p class="trap"><b>Trap:</b> using V·I instead of V·I*, which flips the sign of Q.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s1-3" aria-label="Mark step 1.3 done"><h3><span class="no">1.3</span>Balanced three-phase systems</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 4 · [GLOVER] Ch. 2: Balanced Three-Phase Circuits and Power · [MIT] Ch. 3.</dd>
+            <dt>Key idea</dt><dd><div class="formula">V_LL = √3 · V_LN     S_3φ = √3 · V_LL · I_L     Z_Y = Z_Δ / 3</div></dd>
+            <dt>Do</dt><dd>Plot the three phase voltages of a 230/400 V system and show their sum is zero. Solve a Y and a Δ load per phase. Start <code>pslib/basics.py</code> with reusable functions.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">400 V → 230.9 V L-N</span><span class="ck">100 kVA at 400 V → 144.3 A</span></dd></dl>
+            <p class="trap"><b>Trap:</b> forgetting √3; mixing line and phase quantities.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s1-4" aria-label="Mark Phase 1 checkpoint done"><h3><span class="no">✓</span>Phase 1 checkpoint</h3><span class="hrs">2 h</span></div>
+            <p>Without notes: RMS of a 325 V peak sine · line current, Q and S of a 20 kW, pf 0.85 motor at 400 V · why a capacitor bank raises feeder-end voltage · why three-phase is used for transmission.</p></article>
+        </div>
+      </section>
+
+      <!-- PHASE 2 -->
+      <section id="phase-2">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 2</div>
+          <h2>Components and the per-unit system</h2>
+          <div class="meta"><span>Weeks 5–7</span><span>about 34 h</span></div>
+          <p class="outcome">Model transformers, lines, sources and loads; convert a network to per-unit; build the <b>same</b> small network in pandapower and PowerFactory with matching results.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s2-1" aria-label="Mark step 2.1 done"><h3><span class="no">2.1</span>Transformers</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 8 · [GLOVER] Ch. 3: ideal transformer, equivalent circuits, three-phase connections.</dd>
+            <dt>Key idea</dt><dd><div class="formula">Z (Ω, referred to a side) = (u_k / 100) · U_r² / S_r</div></dd>
+            <dt>Do</dt><dd>Write <code>trafo_impedance()</code>. Print pandapower's <code>"0.4 MVA 20/0.4 kV"</code> type with <code>pp.load_std_type()</code> and explain every field. Learn what Dyn11 means.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">630 kVA, 4 % → Z_LV ≈ 0.0102 Ω</span><span class="ck">infinite grid fault ≈ 22.7 kA</span></dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s2-2" aria-label="Mark step 2.2 done"><h3><span class="no">2.2</span>The per-unit system</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[GLOVER] Ch. 3: The Per-Unit System (redo every example) · [SAADAT] or [NPTEL] per-unit lectures.</dd>
+            <dt>Key idea</dt><dd><div class="formula">Z_base = U²/S     I_base = S/(√3·U)     Z_new = Z_old·(U_old/U_new)²·(S_new/S_old)</div></dd>
+            <dt>Do</dt><dd>Write <code>pslib/perunit.py</code>. Solve a 3-zone textbook example once in ohms and once in per-unit.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">100 MVA, 20 kV → 4 Ω</span><span class="ck">I_base ≈ 2.887 kA</span><span class="ck">630 kVA, 4 % on 100 MVA ≈ 6.35 p.u.</span></dd></dl>
+            <p class="trap"><b>Trap:</b> one U_base for all zones; each transformer changes it.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s2-3" aria-label="Mark step 2.3 done"><h3><span class="no">2.3</span>Lines and cables</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 9 · [GLOVER] Ch. 4 (skim) and Ch. 5 (closely): π-model, voltage regulation, loadability.</dd>
+            <dt>Key idea</dt><dd><div class="formula">ΔU ≈ (P·R + Q·X) / U</div></dd>
+            <dt>Do</dt><dd>20 kV line, 5 km, R′ = 0.3 Ω/km, X′ = 0.35 Ω/km, 3 MW + 1 Mvar. Estimate by hand, then model in pandapower. Compare cable and overhead-line capacitance. Increase load past 100 % loading.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">ΔU ≈ 312 V ≈ 1.56 %</span></dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s2-4" aria-label="Mark step 2.4 done"><h3><span class="no">2.4</span>Sources and loads</h3><span class="hrs">4 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[VONMEIER] Ch. 6, Ch. 10 (synchronous generator), Ch. 11.</dd>
+            <dt>Done when</dt><dd>You can explain pandapower <code>ext_grid</code>, <code>gen</code> and <code>sgen</code> and their PowerFactory equivalents <code>ElmXnet</code>, <code>ElmSym</code>, <code>ElmGenstat</code>; and constant P, Z and I load models.</dd></dl></article>
+
+          <article class="step star"><div class="step-top"><input type="checkbox" id="s2-5" aria-label="Mark step 2.5 done"><h3><span class="no">2.5</span>Mini-project A: first cross-validation</h3><span class="hrs">6 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Do the PowerFactory load flow tutorial (Help → Tutorial).</li><li>Rebuild the Phase 0 network in PowerFactory with the exact pandapower transformer and cable data.</li><li>Fill a table: hand estimate vs pandapower vs PowerFactory for bus voltages, loadings and losses.</li><li>If voltages differ by more than about 0.1 %, find and document the cause.</li></ol></dd>
+            <dt>Done when</dt><dd>Voltages agree to about 3 decimal places in p.u., or the difference is explained.</dd></dl>
+            <p class="trap"><b>Trap:</b> voltage-dependent load in PowerFactory, transformer tap not at neutral, B in µS vs C in nF.</p></article>
+        </div>
+      </section>
+
+      <!-- PHASE 3 -->
+      <section id="phase-3">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 3 · Project P1</div>
+          <h2>Power flow (load flow)</h2>
+          <div class="meta"><span>Weeks 8–10</span><span>about 36 h</span><span>Test system: WSCC 9-bus / MATPOWER case9</span></div>
+          <p class="outcome">Understand a load flow solver from the inside by writing one, run professional load flow and N-1 studies, and publish <b>P1</b>.</p>
+          <p class="reading">Main reading: [GLOVER] Ch. 6 · [VONMEIER] Ch. 12–13 · [SAADAT] power flow chapter · [NPTEL] weeks 5–6 · [MIT] Ch. 5</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s3-1" aria-label="Mark step 3.1 done"><h3><span class="no">3.1</span>Bus types and the admittance matrix Y<sub>bus</sub></h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>Slack bus: |V| and θ known. PV bus: P and |V| known. PQ bus: P and Q known. S<sub>i</sub> = V<sub>i</sub> · (Σ Y<sub>ij</sub> V<sub>j</sub>)* is nonlinear, so it must be solved iteratively.</dd>
+            <dt>Do</dt><dd>Build a 3-bus Y<sub>bus</sub> by hand, then write <code>build_ybus()</code> and build Y<sub>bus</sub> for MATPOWER <code>case9</code>.</dd></dl></article>
+
+          <article class="step star"><div class="step-top"><input type="checkbox" id="s3-2" aria-label="Mark step 3.2 done"><h3><span class="no">3.2</span>Write your own Newton-Raphson solver</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Flat start, then loop: compute P and Q, find the mismatch (ΔP for non-slack buses, ΔQ for PQ buses), stop below 1e-8 p.u.</li><li>Build the Jacobian (numerically first, then analytically) and solve with <code>numpy.linalg.solve</code>.</li><li>Validate on case9 against MATPOWER <code>runpf('case9')</code> and pandapower <code>pn.case9()</code>; add a test file.</li></ol></dd>
+            <dt>Done when</dt><dd>All three agree to about 4 decimals in |V| and 0.01° in θ, converging in 3–6 iterations.</dd></dl>
+            <p class="trap"><b>Trap:</b> MW vs p.u. (divide by 100 MVA), missing line charging, 1-based vs 0-based bus numbers.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s3-3" aria-label="Mark step 3.3 done"><h3><span class="no">3.3</span>Operating limits and controls</h3><span class="hrs">4 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>Voltage limits come from the grid code or planning criteria. [EN50160] sets ±10 % for 95 % of 10-minute averages on public LV/MV supply. Thermal loading must stay ≤ 100 %. Generators have Q limits. Controls: AVR setpoints, OLTC taps, shunt capacitors and reactors.</dd>
+            <dt>Do</dt><dd>Scale case9 loads up in 10 % steps until a limit fails, then fix it with one measure and show before and after.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s3-4" aria-label="Mark step 3.4 done"><h3><span class="no">3.4</span>The 9-bus system in PowerFactory</h3><span class="hrs">6 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd>Use the Examples window version if there is one, but verify its data. Otherwise build it from [ANDERSON]: generators at 16.5, 18 and 13.8 kV, step-up transformers to 230 kV, 6 lines, 3 loads, 100 MVA base. Compare with pandapower and make the single-line diagram presentable.</dd></dl>
+            <p class="trap"><b>Note:</b> pandapower's case9 comes from MATPOWER, and its bus numbering can differ from the Anderson &amp; Fouad drawing. Match elements by their data.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s3-5" aria-label="Mark step 3.5 done"><h3><span class="no">3.5</span>N-1 contingency analysis</h3><span class="hrs">4 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[PP-N1] and the <code>contingency_analysis.ipynb</code> tutorial · PowerFactory manual: Contingency Analysis.</dd>
+            <dt>Do</dt><dd>Run <code>run_contingency(net, {"line": {"index": ...}})</code> in pandapower and the contingency command in PowerFactory. Tabulate outage → worst loading → min/max voltage → violation, and mitigate the worst case.</dd></dl>
+            <p class="trap"><b>Trap:</b> outaging a generator step-up transformer islands the generator. Handle it explicitly.</p></article>
+
+          <div class="project"><span class="tag">Portfolio project P1</span><h3>Load flow and N-1 contingency study</h3>
+            <p>Folder <code>P1-load-flow-n1/</code>: README with the SLD and key results, a 5–8 page PDF, pandapower scripts, PowerFactory screenshots, your NR solver with tests, and results as CSV.</p>
+            <p><b>Report template, reused in every project:</b> scope · network and data sources · assumptions and criteria (labelled) · method and tool versions · results · issues and mitigations · validation · conclusions.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 4 -->
+      <section id="phase-4">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 4 · Project P2</div>
+          <h2>Faults and IEC 60909 short circuit</h2>
+          <div class="meta"><span>Weeks 11–13</span><span>about 34 h</span><span>Test system: CIGRE MV benchmark (15 buses, 20 kV)</span></div>
+          <p class="outcome">Calculate symmetrical and unsymmetrical fault currents by hand, run IEC 60909 studies in two tools, and check equipment ratings.</p>
+          <p class="reading">Main reading: [GLOVER] Ch. 8–10 · [MIT] Ch. 4 · [NPTEL] weeks 9–11 · [PP-SC] · [IEC60909]</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s4-1" aria-label="Mark step 4.1 done"><h3><span class="no">4.1</span>Symmetrical (three-phase) faults</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>I<sub>k</sub> = U<sub>prefault</sub> / Z<sub>Th</sub>. IEC 60909 defines <b>I<sub>k</sub>″</b> (initial symmetrical current), <b>i<sub>p</sub></b> (first peak including DC offset, for making capacity and mechanical forces) and <b>I<sub>th</sub></b> (thermal equivalent). Fault level S<sub>k</sub>″ = √3 · U<sub>n</sub> · I<sub>k</sub>″.</dd>
+            <dt>Do</dt><dd>Fault at the LV side of the 630 kVA, 4 % transformer fed from a 250 MVA grid, compared with the 22.7 kA infinite-grid answer. Redo one Z<sub>bus</sub> fault example from [GLOVER] Ch. 8.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s4-2" aria-label="Mark step 4.2 done"><h3><span class="no">4.2</span>Symmetrical components</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd><div class="formula">a = 1∠120°     [Va Vb Vc]ᵀ = A · [V0 V1 V2]ᵀ,  A = [[1,1,1],[1,a²,a],[1,a,a²]]</div>Zero-sequence paths depend on earthing and vector group: a Dyn transformer blocks zero-sequence current between its sides.</dd>
+            <dt>Do</dt><dd>Write <code>abc_to_012</code> and <code>012_to_abc</code>, reproduce textbook examples, and hand-draw zero-sequence networks for YNd and Dyn transformers.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s4-3" aria-label="Mark step 4.3 done"><h3><span class="no">4.3</span>Unsymmetrical faults</h3><span class="hrs">6 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd><div class="formula">SLG: Ia = 3·Vf / (Z1+Z2+Z0)     LL: Ib = −j·√3·Vf / (Z1+Z2)</div></dd>
+            <dt>Do</dt><dd>Code SLG, LL and DLG in <code>pslib/faults.py</code>. Show when an SLG fault exceeds a three-phase fault (Z<sub>0</sub> &lt; Z<sub>1</sub>).</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s4-4" aria-label="Mark step 4.4 done"><h3><span class="no">4.4</span>IEC 60909 in practice</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>Equivalent voltage source c·U<sub>n</sub>/√3 at the fault; loads and line capacitance neglected. c<sub>max</sub> for equipment rating, c<sub>min</sub> for protection sensitivity. <b>Look up the c values in IEC 60909 Table 1 and cite them; do not guess.</b> The 2016 edition covers full-converter units such as PV and batteries.</dd>
+            <dt>Do</dt><dd><ol><li>pandapower: <code>sc.calc_sc(net, case="max", fault="3ph")</code> on <code>create_cigre_network_mv()</code>, then the min case and 1-phase faults (add any missing zero-sequence data and record your assumptions).</li><li>Export with <code>pp.to_excel()</code> and build the same network in PowerFactory. Run IEC 60909 max/min, 3-phase and 1-phase.</li><li>Compare I<sub>k</sub>″ and i<sub>p</sub> per bus, check against assumed switchgear ratings, and repeat with <code>with_der="pv_wind"</code>.</li></ol></dd></dl>
+            <p class="trap"><b>Trap:</b> comparing max in one tool with min in the other; motor or generator contributions on in only one tool.</p></article>
+
+          <div class="project"><span class="tag">Portfolio project P2</span><h3>IEC 60909 short-circuit study of the CIGRE MV network</h3>
+            <p>Bus-by-bus table of I<sub>k</sub>″(max), i<sub>p</sub> and I<sub>k</sub>″(min), a colour-coded fault-level SLD, an equipment adequacy check, the DER effect, pandapower vs PowerFactory validation, and one hand-calculated bus.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 5 -->
+      <section id="phase-5">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 5 · Project P3</div>
+          <h2>Protection basics</h2>
+          <div class="meta"><span>Weeks 14–16</span><span>about 32 h</span></div>
+          <p class="outcome">Understand protection philosophy, set and grade IEC IDMT overcurrent relays on a radial feeder, and present a coordination study.</p>
+          <p class="reading">Main reading: [GLOVER] Ch. 11 · [GERS] · [IEC60255] · [PP-PROT]</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s5-1" aria-label="Mark step 5.1 done"><h3><span class="no">5.1</span>Protection philosophy and hardware</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>Selectivity, sensitivity, speed, reliability. Primary vs backup protection and zones. CT ratios and saturation. Device types: fuse, breaker + relay, recloser; ANSI 50/51, 50N/51N, 87, 21.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s5-2" aria-label="Mark step 5.2 done"><h3><span class="no">5.2</span>IDMT curves and your own TCC tool</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd><div class="formula">t = TMS · k / ((I / I_s)^α − 1)</div>
+              <div class="tbl" style="margin-top:8px"><table><thead><tr><th>Curve</th><th>k</th><th>α</th></tr></thead><tbody>
+                <tr><td>Standard inverse</td><td class="num">0.14</td><td class="num">0.02</td></tr>
+                <tr><td>Very inverse</td><td class="num">13.5</td><td class="num">1</td></tr>
+                <tr><td>Extremely inverse</td><td class="num">80</td><td class="num">2</td></tr>
+                <tr><td>Long-time inverse</td><td class="num">120</td><td class="num">1</td></tr></tbody></table></div>
+              Confirm the constants against the standard, [GERS] or a relay manual, and cite the source.</dd>
+            <dt>Do</dt><dd>Write <code>idmt_time()</code>, a definite-time stage, and a log-log <code>plot_tcc()</code>.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">SI, I_s 400 A, TMS 0.1, 4000 A → t ≈ 0.297 s</span></dd></dl></article>
+
+          <article class="step star"><div class="step-top"><input type="checkbox" id="s5-3" aria-label="Mark step 5.3 done"><h3><span class="no">5.3</span>Coordinate a radial feeder</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Choose a radial CIGRE MV feeder. Place R3 near the end, R2 mid-feeder, R1 at the head.</li><li>Collect max load current, max fault current and min end-of-zone fault current for each relay (from P1 and P2).</li><li>Pickup above max load (factor from [GERS], cited) and below the min fault current, including the backup zone. Choose CT ratios.</li><li>Set R3 at the lowest TMS. Grade R2 over R3 at the max current both see, using a margin from [GERS]; then grade R1 over R2.</li><li>Plot all curves with fault-current lines and list the first relay to trip for each bus.</li><li>Verify in PowerFactory protection if licensed; otherwise use pandapower's <code>protection/oc_relay.ipynb</code> for your installed version.</li></ol></dd></dl>
+            <p class="trap"><b>Trap:</b> grading at the wrong current; min fault current below pickup; mixing primary and secondary amps.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s5-4" aria-label="Mark step 5.4 done"><h3><span class="no">5.4</span>How DER affects protection</h3><span class="hrs">2 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[GERS] distributed generation chapter · [BOLLEN] protection chapter. Note blinding, sympathetic tripping and anti-islanding for the capstone.</dd></dl></article>
+
+          <div class="project"><span class="tag">Portfolio project P3</span><h3>Overcurrent protection coordination study</h3>
+            <p>Feeder SLD with relay and CT locations, input data, cited setting criteria, settings table (CT ratio, curve, I<sub>s</sub>, TMS, instantaneous), TCC plot, discrimination table with achieved margins, Python vs PowerFactory or pandapower validation, and a note on DER impact.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 6 -->
+      <section id="phase-6">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 6 · Project P4</div>
+          <h2>Distribution networks and solar integration</h2>
+          <div class="meta"><span>Weeks 17–19</span><span>about 34 h</span></div>
+          <p class="outcome">Run time-series studies, calculate PV hosting capacity, test voltage-control mitigations, and publish <b>P4</b>.</p>
+          <p class="reading">Main reading: [VONMEIER] Ch. 5, 7, 14 · [GLOVER] Ch. 15 · [BOLLEN] Ch. 3 · [KERSTING] · [EN50160]</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s6-1" aria-label="Mark step 6.1 done"><h3><span class="no">6.1</span>Voltage rise from PV</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd>ΔU ≈ (P·R + Q·X)/U. PV raises voltage, most where R/X is high (LV cables). Absorbing reactive power reduces the rise.</dd>
+            <dt>Do</dt><dd>On <code>create_cigre_network_lv()</code>, add PV at a feeder end and increase P until the voltage limit, then repeat with Q = −0.3·P. Plot U vs P.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s6-2" aria-label="Mark step 6.2 done"><h3><span class="no">6.2</span>Time-series simulation</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>pandapower <code>time_series.ipynb</code> and <code>time_series_multiple_loads_generators.ipynb</code> · PowerFactory manual: Quasi-Dynamic Simulation.</dd>
+            <dt>Do</dt><dd>Build 96-step daily load and PV profiles (pandapower's <code>cigre_timeseries_15min.json</code> or labelled synthetic ones). Use <code>DFData</code>, <code>ConstControl</code>, <code>OutputWriter</code> and <code>run_timeseries</code>. Plot feeder-end voltage at 0, 50 and 100 % PV, then repeat in PowerFactory.</dd></dl></article>
+
+          <article class="step star"><div class="step-top"><input type="checkbox" id="s6-3" aria-label="Mark step 6.3 done"><h3><span class="no">6.3</span>Hosting capacity</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[BOLLEN] Ch. 3: performance index → limit → hosting capacity · pandapower <code>hosting_capacity.ipynb</code>.</dd>
+            <dt>Do</dt><dd>Define and cite the criteria first. Deterministic: increase PV per bus until the first limit fails (bar chart). Stochastic: random placement, about 500 runs, report the 5th, 50th and 95th percentiles.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s6-4" aria-label="Mark step 6.4 done"><h3><span class="no">6.4</span>Mitigations</h3><span class="hrs">6 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd>Test reactive power control (cos φ(P) or Q(U), see <code>DER_control_tutorial.ipynb</code>), an OLTC setpoint change, and optionally a battery. Tabulate the new hosting capacity and side effects.</dd></dl></article>
+
+          <div class="project"><span class="tag">Portfolio project P4</span><h3>PV hosting capacity study with time series</h3>
+            <p>Daily time-series plots, per-bus hosting capacity chart, stochastic histogram, mitigation comparison, pandapower vs PowerFactory quasi-dynamic validation, and recommendations written for a utility planner.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 7 -->
+      <section id="phase-7">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 7 · Project P5</div>
+          <h2>Stability and an EMT introduction</h2>
+          <div class="meta"><span>Weeks 20–22</span><span>about 34 h</span></div>
+          <p class="outcome">Find a critical clearing time analytically, numerically and in PowerFactory RMS simulation (automated with Python), and know when EMT is required.</p>
+          <p class="reading">Main reading: [GLOVER] Ch. 12 · [SAADAT] stability chapter · [P-STAB2021] · [KUNDUR] or [MACHOWSKI]</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s7-1" aria-label="Mark step 7.1 done"><h3><span class="no">7.1</span>Stability classification</h3><span class="hrs">3 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>[P-STAB2021]: rotor angle, voltage, frequency, and the 2021 additions, converter-driven and resonance stability. Redraw the tree.</dd></dl></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s7-2" aria-label="Mark step 7.2 done"><h3><span class="no">7.2</span>Swing equation and equal-area criterion</h3><span class="hrs">9 h</span></div>
+            <dl class="kv"><dt>Key idea</dt><dd><div class="formula">(2H/ω_s)·d²δ/dt² = P_m − P_max·sin δ<br>cos δ_cr = (π − 2δ_0)·sin δ_0 − cos δ_0     t_cr = √(4H(δ_cr − δ_0) / (ω_s·P_m))</div></dd>
+            <dt>Do</dt><dd>H = 5 s, 50 Hz, P<sub>m</sub> = 0.9, P<sub>max</sub> = 1.8 p.u. Integrate with <code>solve_ivp</code> for t<sub>c</sub> = 0.20 s and 0.30 s, then find t<sub>cr</sub> by bisection.</dd>
+            <dt>Check</dt><dd class="checks"><span class="ck">δ_0 = 30°</span><span class="ck">δ_cr ≈ 79.6°</span><span class="ck">t_cr ≈ 0.247 s</span></dd></dl></article>
+
+          <article class="step star"><div class="step-top"><input type="checkbox" id="s7-3" aria-label="Mark step 7.3 done"><h3><span class="no">7.3</span>PowerFactory RMS simulation, automated</h3><span class="hrs">10 h</span></div>
+            <dl class="kv"><dt>Do</dt><dd><ol><li>Add dynamic data from [ANDERSON] to your 9-bus model.</li><li>Apply a 3-phase line fault at 0.1 s and clear it by tripping the line. Plot relative rotor angles.</li><li>With <code>import powerfactory</code>, loop: set clearing time → <code>ComInc</code> + <code>ComSim</code> → read angles → stable? → bisect. Save CSV and plots.</li><li>Repeat for 3 fault locations.</li></ol></dd></dl>
+            <p class="trap"><b>Trap:</b> absolute rotor angles drift, so use relative ones; state the load model. If RMS is not licensed, do the multi-machine study in Python or MATLAB and say so.</p></article>
+
+          <article class="step"><div class="step-top"><input type="checkbox" id="s7-4" aria-label="Mark step 7.4 done"><h3><span class="no">7.4</span>EMT with PSCAD</h3><span class="hrs">8 h</span></div>
+            <dl class="kv"><dt>Learn</dt><dd>PSCAD tutorial projects in order. [AEMO] uses PSS®E for RMS and PSCAD for EMT connection studies.</dd>
+            <dt>Do</dt><dd>20 kV source → breaker → 3-phase fault; apply it at voltage zero and at voltage peak and observe the DC offset. Compare the worst peak with IEC 60909: <span class="mono">κ = 1.02 + 0.98·e^(−3R/X)</span>, <span class="mono">i_p = κ·√2·I_k″</span>.</dd></dl></article>
+
+          <div class="project"><span class="tag">Portfolio project P5</span><h3>Transient stability (CCT) study plus EMT fault demonstration</h3>
+            <p>SMIB validation, 9-bus RMS fault cases and CCT table, a description of your PowerFactory automation script, and the PSCAD peak-current check against IEC 60909.</p></div>
+        </div>
+      </section>
+
+      <!-- PHASE 8 -->
+      <section id="phase-8">
+        <div class="sec-head">
+          <div class="eyebrow">Phase 8 · Capstone</div>
+          <h2>Grid connection study: PV + battery on the CIGRE MV network</h2>
+          <div class="meta"><span>Weeks 23–26</span><span>about 45 h</span></div>
+          <p class="outcome">A developer wants to connect a solar PV plant with a battery to the 20 kV network. Find <b>the maximum export capacity without reinforcement</b>, check the steady-state, fault-level and protection criteria, and propose mitigations for a larger plant.</p>
+        </div>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>#</th><th>Study</th><th>Reuses</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Data and assumptions register: every assumption gets an ID and a source</td><td>All</td></tr>
+              <tr><td class="num">2</td><td>Load flow dimensioning cases: max PV + min load, no PV + max load, BESS charging at max load</td><td>Phase 3</td></tr>
+              <tr><td class="num">3</td><td>N-1 contingency using the network's switches; is curtailment needed?</td><td>Phase 3</td></tr>
+              <tr><td class="num">4</td><td>Voltage change when the plant trips from full output, against a cited limit</td><td>Phases 3, 6</td></tr>
+              <tr><td class="num">5</td><td>Reactive power capability at the connection point, framed by [RfG] with national values as assumptions</td><td>Phases 2, 6</td></tr>
+              <tr><td class="num">6</td><td>IEC 60909 with and without the plant; equipment adequacy; short-circuit ratio</td><td>Phase 4</td></tr>
+              <tr><td class="num">7</td><td>Protection impact: blinding, sympathetic tripping, setting changes</td><td>Phase 5</td></tr>
+              <tr><td class="num">8</td><td>Time series: voltage, loading, curtailment, and how the BESS reduces it</td><td>Phase 6</td></tr>
+              <tr><td class="num">9</td><td>Optional RMS: fault near the connection point, fault ride-through concept</td><td>Phase 7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="card"><h4>Engineering standard</h4><p>One entry point, <code>python run_all_studies.py</code>, reproduces every table and figure. PowerFactory vs pandapower comparison for each study type. Small commits and a tagged <code>v1.0</code>.</p></div>
+          <div class="card"><h4>Report (15–25 pages)</h4><p>Executive summary (written last, under 200 words) · scope · network and plant · criteria and assumptions · method · results per study · mitigations · conclusions · appendices.</p></div>
+          <div class="card"><h4>Schedule</h4><p>Week 23: brief, register, models, studies 2–3 · Week 24: studies 4–7 · Week 25: study 8 (+9), automation, tests · Week 26: report and portfolio.</p></div>
+        </div>
+        <div class="steps" style="margin-top:14px">
+          <article class="step"><div class="step-top"><input type="checkbox" id="s8-1" aria-label="Mark capstone done"><h3><span class="no">★</span>Capstone published</h3></div>
+            <p>Every number reproducible from <code>run_all_studies.py</code>, and the first page answers the three brief questions.</p></article>
+          <article class="step"><div class="step-top"><input type="checkbox" id="s8-2" aria-label="Mark portfolio packaging done"><h3><span class="no">★</span>Portfolio packaged</h3></div>
+            <dl class="kv"><dt>Landing page</dt><dd>A one-line intro, a skills matrix (studies × tools) linking to proof, a project card per study with one figure and one result, and an honesty line: self-directed studies on public benchmark networks.</dd>
+            <dt>CV bullets</dt><dd>Action + study + tool + scale + verification, with <b>your real numbers</b>, e.g. "Performed IEC 60909 max/min short-circuit study of a 15-bus 20 kV benchmark network in DIgSILENT PowerFactory; cross-validated against pandapower (max deviation __ %)."</dd>
+            <dt>LinkedIn</dt><dd>One post per project as it finishes: the problem, one figure, one lesson, and the repo link.</dd></dl></article>
+        </div>
+      </section>
+
+      <!-- INTERVIEW -->
+      <section id="interview">
+        <div class="sec-head">
+          <h2>Interview preparation</h2>
+          <p class="outcome">Answer each one aloud in under 2 minutes before you apply.</p>
+        </div>
+        <ol class="qs">
+          <li>What is reactive power and why does it matter for voltage?</li>
+          <li>Explain the per-unit system and why we use it.</li>
+          <li>What are PQ, PV and slack buses?</li>
+          <li>How does Newton-Raphson load flow work, and when does it fail to converge?</li>
+          <li>What does N-1 mean? Give a violation and a fix.</li>
+          <li>Difference between I<sub>k</sub>″, i<sub>p</sub> and I<sub>th</sub>, and which rating each checks?</li>
+          <li>Why does IEC 60909 use a voltage factor c, and why max and min cases?</li>
+          <li>Why can an SLG fault exceed a three-phase fault?</li>
+          <li>What does Dyn11 mean, and why does it matter for earth faults?</li>
+          <li>How do you grade two IDMT relays, and what is the margin made of?</li>
+          <li>What is protection blinding?</li>
+          <li>Why does PV raise feeder voltage, and how does Q(U) help?</li>
+          <li>Define hosting capacity.</li>
+          <li>What is critical clearing time? Explain the equal-area criterion.</li>
+          <li>When do you need EMT instead of RMS simulation?</li>
+          <li>What is the short-circuit ratio and why do inverter-based plants care?</li>
+          <li>Walk me through your capstone: the biggest constraint and the mitigation.</li>
+          <li>Tell me about a time two tools disagreed. How did you find out why?</li>
+        </ol>
+      </section>
+
+      <!-- REFERENCES -->
+      <section id="references" class="refs">
+        <div class="sec-head">
+          <h2>References</h2>
+          <p class="outcome">Each item was checked against a publisher page, official site or the documentation itself in October 2026. If your edition differs, find chapters by title.</p>
+        </div>
+
+        <h3>Core textbooks</h3>
+        <ul>
+          <li><span class="code">[GLOVER]</span> Glover, Overbye, Sarma (+ Birchfield), <i>Power System Analysis and Design</i>, 7th ed., Cengage. The main textbook; get the SI edition. <a href="https://www.webassign.net/features/textbooks/gosbpowersysad7/details.html">Table of contents</a> · <a href="https://www.cengage.com/c/etextbook-power-system-analysis-and-design-si-edition-7e-glover-sarma-overbye-birchfield/9780357676387">SI edition</a></li>
+          <li><span class="code">[VONMEIER]</span> A. von Meier, <i>Electric Power Systems: A Conceptual Introduction</i>, 2nd ed., Wiley-IEEE, 2024, ISBN 978-1-394-24100-2. <a href="https://www.wiley-vch.de/en/areas-interest/engineering/electric-power-systems-978-1-394-24100-2">Publisher</a></li>
+          <li><span class="code">[SAADAT]</span> H. Saadat, <i>Power System Analysis</i>, 3rd ed., PSA Publishing, 2011, with 140+ MATLAB/Simulink examples. <a href="https://ch.mathworks.com/academia/books/power-system-analysis-saadat.html">MathWorks book page</a></li>
+          <li><span class="code">[GRAINGER]</span> Grainger &amp; Stevenson, <i>Power System Analysis</i>, McGraw-Hill, 1994 (optional alternative).</li>
+        </ul>
+
+        <h3>Specialist books</h3>
+        <ul>
+          <li><span class="code">[GERS]</span> Gers &amp; Holmes, <i>Protection of Electricity Distribution Networks</i>, 3rd ed. (2011) or 4th ed., IET. <a href="https://shop.theiet.org/prot-elec-distrib-net-3ed">IET shop</a></li>
+          <li><span class="code">[BOLLEN]</span> Bollen &amp; Hassan, <i>Integration of Distributed Generation in the Power System</i>, Wiley-IEEE Press, 2011. <a href="https://www.ellibs.com/book/9781118029015/integration-of-distributed-generation-in-the-power-system">Book record</a></li>
+          <li><span class="code">[KERSTING]</span> W. H. Kersting, <i>Distribution System Modeling and Analysis</i>, 4th ed., CRC Press, 2017. <a href="https://www.oreilly.com/library/view/-/9781498772150/">O'Reilly</a></li>
+          <li><span class="code">[KUNDUR]</span> Kundur &amp; Malik, <i>Power System Stability and Control</i>, 2nd ed., McGraw Hill, 2022. <a href="https://www.mheducation.com/highered/mhp/product/power-system-stability-control-second-edition.html">Publisher</a></li>
+          <li><span class="code">[MACHOWSKI]</span> Machowski, Lubosny, Bialek, Bumby, <i>Power System Dynamics: Stability and Control</i>, 3rd ed., Wiley, 2020. <a href="https://www.ee.pw.edu.pl/en/?p=6543">Warsaw Univ. of Technology</a></li>
+          <li><span class="code">[ANDERSON]</span> Anderson &amp; Fouad, <i>Power System Control and Stability</i>, Wiley-IEEE Press. Source of the WSCC 9-bus system. <a href="https://ch.mathworks.com/help/sps/ug/ieee-9-bus.html">MathWorks 9-bus page</a></li>
+        </ul>
+
+        <h3>Free courses and notes</h3>
+        <ul>
+          <li><span class="code">[MIT]</span> MIT OCW 6.061 <i>Introduction to Electric Power Systems</i> (Kirtley). <a href="https://ocw.mit.edu/courses/6-061-introduction-to-electric-power-systems-spring-2011/pages/readings">Readings</a></li>
+          <li><span class="code">[NPTEL]</span> NPTEL <i>Power System Analysis</i>, Prof. D. Das, IIT Kharagpur. <a href="https://archive.nptel.ac.in/content/syllabus_pdf/117105140.pdf">Syllabus</a></li>
+          <li><span class="code">[EIG]</span> Schneider Electric <i>Electrical Installation Guide</i> (IEC 60364). <a href="https://www.electrical-installation.org/enwiki/Electrical_Installation_Guide:About">Wiki</a></li>
+        </ul>
+
+        <h3>Software documentation</h3>
+        <ul>
+          <li><span class="code">[PP]</span> pandapower docs: <a href="https://pandapower.readthedocs.io/en/latest/">home</a> · <a href="https://github.com/e2nIEE/pandapower/tree/develop/tutorials">tutorials</a> · <a href="https://pandapower.readthedocs.io/en/latest/shortcircuit/run.html">short circuit</a> · <a href="https://pandapower.readthedocs.io/en/latest/contingency.html">contingency</a> · <a href="https://pandapower.readthedocs.io/en/latest/protection/oc_relay.html">protection</a> · <a href="https://pandapower.readthedocs.io/en/latest/networks/cigre.html">CIGRE networks</a> · <a href="https://pandapower.readthedocs.io/en/latest/networks/power_system_test_cases.html">test cases</a></li>
+          <li><span class="code">[PF]</span> PowerFactory: built-in tutorials, Examples window, User Manual, Python API. <a href="https://pandapower.readthedocs.io/en/latest/converter/powerfactory.html">PowerFactory → pandapower converter</a> · <a href="https://medium.com/@mark.friese.meng/an-introduction-to-python-for-powerfactory-automation-ce9924cc5cc1">Python automation intro</a></li>
+          <li><span class="code">[PSCAD]</span> <a href="https://pscad.com/webhelp-v5-ol/PSCAD/The_Application_Environment/Tutorial_My_First_Simulation/My_First_Simulation.htm">My First Simulation</a> · <a href="https://www.pscad.com/webhelp-v5-ol/PSCAD/The_Application_Environment/Tutorial_Projects.htm">Tutorial projects</a></li>
+          <li><span class="code">[MATPOWER]</span> <a href="https://in.mathworks.com/matlabcentral/fileexchange/72085-matpower">MATPOWER on File Exchange</a></li>
+        </ul>
+
+        <h3>Papers</h3>
+        <ul>
+          <li>Thurner et al., "pandapower: an open-source Python tool…", <i>IEEE Trans. Power Systems</i> 33(6), 2018. <a href="https://arxiv.org/abs/1709.06743v3">arXiv</a></li>
+          <li>Zimmerman, Murillo-Sánchez, Thomas, "MATPOWER…", <i>IEEE Trans. Power Systems</i> 26(1), 2011, doi:10.1109/TPWRS.2010.2051168.</li>
+          <li>Brown, Hörsch, Schlachtberger, "PyPSA: Python for Power System Analysis", <i>JORS</i> 6(1), 2018. <a href="https://arxiv.org/pdf/1707.09913">arXiv</a></li>
+          <li><span class="code">[P-STAB2021]</span> Hatziargyriou et al., "Definition and Classification of Power System Stability: Revisited &amp; Extended", <i>IEEE Trans. Power Systems</i> 36(4), 2021. <a href="https://par.nsf.gov/servlets/purl/10232629">Open copy</a></li>
+          <li><span class="code">[CIGRE-575]</span> CIGRE TF C6.04.02, <i>Benchmark Systems for Network Integration of Renewable and Distributed Energy Resources</i>, TB 575, 2014. <a href="https://www.e-cigre.org/publications/detail/575-benchmark-systems-for-network-integration-of-renewable-and-distributed-energy-resources.html">e-cigre</a></li>
+        </ul>
+
+        <h3>Standards and grid codes</h3>
+        <ul>
+          <li><span class="code">[IEC60038]</span> IEC 60038:2009 standard voltages (230/400 V). <a href="https://webstore.iec.ch/publication/153">IEC webstore</a></li>
+          <li><span class="code">[IEC60909]</span> IEC 60909-0:2016 short-circuit current calculation. <a href="https://webstore.iec.ch/publication/24100">IEC webstore</a></li>
+          <li><span class="code">[IEC60255]</span> IEC 60255-151:2009 over/under current protection (IDMT curves). <a href="https://www.protecta.hu/files/files/41558/short_19_three-phase_time_oc_protection_function_v1.1.pdf">Relay function description citing it</a></li>
+          <li><span class="code">[EN50160]</span> EN 50160 supply voltage characteristics. <a href="https://www.productinfo.schneider-electric.com/pm8000/59834d6446e0fb0001420311/Technical%20note/BM_TechnicalNoteEN50160_0000153756.ditamap/$/C_PQ_EN50160SupplyVoltageVariations_0000153762">Schneider technical note</a></li>
+          <li><span class="code">[RfG]</span> Commission Regulation (EU) 2016/631, Requirements for Generators. <a href="https://www.legislation.gov.uk/eur/2016/631/contents/2020-12-31">Text</a></li>
+          <li><span class="code">[AEMO]</span> AEMO modelling requirements (PSS®E for RMS, PSCAD for EMT). <a href="https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/participate-in-the-market/network-connections/modelling-requirements">AEMO</a></li>
+        </ul>
+
+        <h3>Job-market evidence</h3>
+        <ul>
+          <li><a href="https://targetjobs.co.uk/jobs/graduate-electrical-power-systems-engineer-216306">TARGETjobs: Graduate Electrical Power Systems Engineer</a> · <a href="https://www.studentjob.co.uk/vacancies/6030631-graduate-power-systems-engineer">StudentJob UK</a> · <a href="https://mail.digsilent.com.au/pages/careers/position_details?id=5">DIgSILENT Australia careers</a>. Postings change, so read current ones in your own country in Phase 0.</li>
+        </ul>
+      </section>
+
+      <footer>Full step-by-step files, code snippets and the progress tracker are in the <a href="https://github.com/Taio11k/Power-System-Basics">Power-System-Basics repository</a>. Worked check values were recomputed numerically. References verified October 2026.</footer>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY = "psb-progress-v1";
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.step input[type="checkbox"]'));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+  var label = document.getElementById("progress-label");
+  var fill = document.getElementById("progress-fill");
+  function update(){
+    var done = boxes.filter(function(b){ return b.checked; }).length;
+    label.textContent = done + " of " + boxes.length + " steps done";
+    fill.style.width = (boxes.length ? (done / boxes.length * 100) : 0) + "%";
+  }
+  boxes.forEach(function(b){
+    if (saved[b.id]) b.checked = true;
+    b.addEventListener("change", function(){
+      saved[b.id] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+      update();
+    });
+  });
+  update();
+})();
+</script>

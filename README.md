@@ -50,6 +50,7 @@ Phase 8  CAPSTONE + portfolio packaging ............. weeks 23–26
 | 8 | [course/08-capstone-portfolio.md](course/08-capstone-portfolio.md) |
 | — | [PROGRESS.md](PROGRESS.md): tick boxes as you go |
 | — | [REFERENCES.md](REFERENCES.md): every book, paper, standard and doc, with links |
+| — | [web/power-system-basics.html](web/power-system-basics.html): source of the web version |
 
 ---
 
