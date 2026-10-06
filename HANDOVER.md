@@ -69,7 +69,19 @@ Check it works by running the minimal example in [course/00-setup.md](course/00-
 
 ## Start prompt (paste at the beginning of every new session)
 
-> Read CLAUDE.md, README.md and PROGRESS.md. Tell me which phase and step I'm on, what I should do next, and what files I should produce. Then help me with that step.
+```text
+I'm continuing my Power System Basics course from this repo.
+
+1. Sync: run `git pull` so you have the latest work from my other computers and the cloud.
+2. Load context: read CLAUDE.md, README.md, PROGRESS.md and HANDOVER.md, then the course/ file for the phase I'm on.
+3. Check this machine: is the Python environment set up (.venv + requirements.txt)? If not, walk me through HANDOVER.md step by step. Ask me which of PowerFactory, PSCAD and MATLAB are installed here, and adapt the steps to that.
+4. Tell me where I am: the current phase and step, its objective, what to read (exact chapters), the numbered actions, the file I must produce, and the check values.
+5. Guide me through that one step. Wait for my results before moving to the next step, and check my numbers against the check values.
+
+Rules: hand-hold me; don't skip steps. Don't invent facts, references or numbers. Verify them against credible sources and say when you can't.
+
+When I say "wrap up": tick the finished steps in PROGRESS.md, add a line to LOG.md, then commit and push everything.
+```
 
 ---
 
