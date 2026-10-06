@@ -1,0 +1,8 @@
+# Python packages used in the course (Phase 0 step 0.2, plus scipy for Phase 7)
+pandapower
+numpy
+pandas
+matplotlib
+scipy
+jupyter
+openpyxl

@@ -2,6 +2,8 @@
 
 **Website:** https://taio11k.github.io/Power-System-Basics/ (an interactive roadmap with progress ticks). Also on [claude.ai](https://claude.ai/artifact/CNg9KrHXyNkaiGcmMBEQQq).
 
+**Working on another computer or in the cloud?** Follow [HANDOVER.md](HANDOVER.md).
+
 A guided course, from zero to a portfolio. It assumes an engineering degree in another field, some Python, and 10+ hours a week. It follows **IEC** standards (230/400 V, 50 Hz).
 
 ---
