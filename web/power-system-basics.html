@@ -119,6 +119,11 @@ td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-spac
 .refs h3{font-size:1.1rem;margin:26px 0 10px;font-weight:700}
 .refs ul{margin:0;padding-left:20px;display:grid;gap:7px;font-size:14.5px}
 .code{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:500}
+.prompt-box{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:8px;min-width:0}
+.prompt-box pre{margin:0;padding:16px 18px;overflow-x:auto;white-space:pre-wrap;font-family:var(--font-mono);font-size:13px;line-height:1.55}
+.prompt-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px 8px 18px;border-bottom:1px solid var(--rule);font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.copy-btn{font:600 13px var(--font-body);padding:6px 12px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);cursor:pointer}
+.sync{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px}
 footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
 
 @media (max-width:860px){
@@ -163,6 +168,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-si
         <li class="proj"><a href="#phase-7">7 · Stability &amp; EMT → P5<span class="wk">weeks 20–22</span></a></li>
         <li class="proj"><a href="#phase-8">8 · Capstone<span class="wk">weeks 23–26</span></a></li>
         <li><a href="#interview">Interview prep<span class="wk">18 questions</span></a></li>
+        <li><a href="#any-computer">Any computer<span class="wk">start prompt, sync</span></a></li>
         <li><a href="#references">References<span class="wk">verified sources</span></a></li>
       </ol>
       <div class="progress" aria-live="polite">
@@ -556,6 +562,42 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-si
         </ol>
       </section>
 
+      <!-- ANY COMPUTER -->
+      <section id="any-computer">
+        <div class="sec-head">
+          <h2>Continue on any computer</h2>
+          <p class="outcome">The <a href="https://github.com/Taio11k/Power-System-Basics">GitHub repo</a> is the one shared copy of the course and your work. Start every Claude Code session, on any PC or in the cloud at claude.ai/code, by pasting this prompt. It tells Claude where the repo is, so it works even in a brand-new session.</p>
+        </div>
+        <div class="prompt-box">
+          <div class="prompt-bar"><span>Start prompt</span><button type="button" class="copy-btn" id="copy-prompt">Copy prompt</button></div>
+<pre id="start-prompt">I'm learning power systems with a self-study course I keep in my GitHub repo:
+https://github.com/Taio11k/Power-System-Basics (owner: Taio11k, branch: main)
+
+It's a 26-week guided course (IEC standards) that ends in a portfolio of power system study projects for a junior power systems engineer job. The tools are DIgSILENT PowerFactory, Python/pandapower, PSCAD and MATLAB. The repo has the course (course/), my progress tracker (PROGRESS.md), verified references (REFERENCES.md), the course web page (web/, live at https://taio11k.github.io/Power-System-Basics/) and the project context for you (CLAUDE.md).
+
+1. Get the repo:
+   - If the current folder is already a clone of that repo, run `git pull`.
+   - If not, clone it with `git clone https://github.com/Taio11k/Power-System-Basics.git` and work inside the new Power-System-Basics folder.
+   - If git asks for GitHub access, help me sign in with `gh auth login` (as Taio11k or the collaborator DvEz373) and run `gh auth setup-git`.
+   - Before the first commit on this machine, check `git config user.name` and `git config user.email`. If they aren't set for this repo, ask me which name and email to use.
+2. Load context: read CLAUDE.md first and follow it. Then read README.md, PROGRESS.md and HANDOVER.md, and the course/ file for the phase I'm on.
+3. Check this machine: is the Python environment set up (.venv + requirements.txt)? If not, walk me through HANDOVER.md step by step. Ask me which of PowerFactory, PSCAD and MATLAB are installed here, and adapt the steps to that. In a cloud session, only Python can run.
+4. Tell me where I am: the current phase and step, its objective, what to read (exact chapters), the numbered actions, the file I must produce, and the check values.
+5. Guide me through that one step. Wait for my results before moving to the next step, and check my numbers against the check values.
+
+Rules: hand-hold me; don't skip steps. Don't invent facts, references or numbers. Verify them against credible sources and say when you can't.
+
+When I say "wrap up": tick the finished steps in PROGRESS.md, add a line to LOG.md, then commit and push everything.</pre>
+        </div>
+        <div class="sync">
+          <div class="card"><h4>Start of a session</h4><p>Paste the prompt. Claude pulls the latest work, or clones the repo on a new PC.</p></div>
+          <div class="card"><h4>While working</h4><p>Tick steps in PROGRESS.md and add a line to LOG.md.</p></div>
+          <div class="card"><h4>End of a session</h4><p>Say "wrap up". Claude commits and pushes, so the next machine starts where you stopped.</p></div>
+          <div class="card"><h4>One machine at a time</h4><p>Push before switching. PowerFactory, PSCAD and MATLAB run only on PCs where they are installed; the cloud runs Python only.</p></div>
+        </div>
+        <p style="margin:14px 0 0;max-width:70ch">Full setup for a new PC, and what does and doesn't sync: <a href="https://github.com/Taio11k/Power-System-Basics/blob/main/HANDOVER.md">HANDOVER.md</a>.</p>
+      </section>
+
       <!-- REFERENCES -->
       <section id="references" class="refs">
         <div class="sec-head">
@@ -648,5 +690,25 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-si
     });
   });
   update();
+
+  var copyBtn = document.getElementById("copy-prompt");
+  var promptEl = document.getElementById("start-prompt");
+  function selectPrompt(){
+    var range = document.createRange();
+    range.selectNodeContents(promptEl);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  copyBtn.addEventListener("click", function(){
+    var text = promptEl.textContent;
+    var done = function(){ copyBtn.textContent = "Copied"; setTimeout(function(){ copyBtn.textContent = "Copy prompt"; }, 2000); };
+    var fallback = function(){ selectPrompt(); copyBtn.textContent = "Press Ctrl+C to copy"; };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+    } catch (e) { fallback(); }
+  });
 })();
 </script>
