@@ -65,16 +65,27 @@ Check it works by running the minimal example in [course/00-setup.md](course/00-
 
 ### 6. Open the folder in Claude Code and paste the start prompt below.
 
+You can also skip steps 3–5: open Claude Code in any empty folder and paste the start prompt. It tells Claude where the repo is, and Claude clones it and sets things up with you.
+
 ---
 
 ## Start prompt (paste at the beginning of every new session)
 
-```text
-I'm continuing my Power System Basics course from this repo.
+The prompt is self-contained: it works in a brand-new session that knows nothing about this project, on a new PC, an existing PC or the cloud.
 
-1. Sync: run `git pull` so you have the latest work from my other computers and the cloud.
-2. Load context: read CLAUDE.md, README.md, PROGRESS.md and HANDOVER.md, then the course/ file for the phase I'm on.
-3. Check this machine: is the Python environment set up (.venv + requirements.txt)? If not, walk me through HANDOVER.md step by step. Ask me which of PowerFactory, PSCAD and MATLAB are installed here, and adapt the steps to that.
+```text
+I'm learning power systems with a self-study course I keep in my GitHub repo:
+https://github.com/Taio11k/Power-System-Basics (owner: Taio11k, branch: main)
+
+It's a 26-week guided course (IEC standards) that ends in a portfolio of power system study projects for a junior power systems engineer job. The tools are DIgSILENT PowerFactory, Python/pandapower, PSCAD and MATLAB. The repo has the course (course/), my progress tracker (PROGRESS.md), verified references (REFERENCES.md), the course web page (web/, live at https://taio11k.github.io/Power-System-Basics/) and the project context for you (CLAUDE.md).
+
+1. Get the repo:
+   - If the current folder is already a clone of that repo, run `git pull`.
+   - If not, clone it with `git clone https://github.com/Taio11k/Power-System-Basics.git` and work inside the new Power-System-Basics folder.
+   - If git asks for GitHub access, help me sign in with `gh auth login` (as Taio11k or the collaborator DvEz373) and run `gh auth setup-git`.
+   - Before the first commit on this machine, check `git config user.name` and `git config user.email`. If they aren't set for this repo, ask me which name and email to use.
+2. Load context: read CLAUDE.md first and follow it. Then read README.md, PROGRESS.md and HANDOVER.md, and the course/ file for the phase I'm on.
+3. Check this machine: is the Python environment set up (.venv + requirements.txt)? If not, walk me through HANDOVER.md step by step. Ask me which of PowerFactory, PSCAD and MATLAB are installed here, and adapt the steps to that. In a cloud session, only Python can run.
 4. Tell me where I am: the current phase and step, its objective, what to read (exact chapters), the numbered actions, the file I must produce, and the check values.
 5. Guide me through that one step. Wait for my results before moving to the next step, and check my numbers against the check values.
 
