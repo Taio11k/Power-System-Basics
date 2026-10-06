@@ -1,5 +1,7 @@
 # Power System Basics → Junior Power Systems Engineer Portfolio
 
+**Web version:** [Power System Basics on claude.ai](https://claude.ai/artifact/CNg9KrHXyNkaiGcmMBEQQq) (an interactive roadmap with progress ticks).
+
 A guided course, from zero to a portfolio. It assumes an engineering degree in another field, some Python, and 10+ hours a week. It follows **IEC** standards (230/400 V, 50 Hz).
 
 ---
