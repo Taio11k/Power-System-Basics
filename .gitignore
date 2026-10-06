@@ -11,3 +11,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# GitHub Pages local build
+_site/
