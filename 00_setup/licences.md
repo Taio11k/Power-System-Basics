@@ -39,7 +39,21 @@ None of the course's "if not licensed" fallback paths are needed.
 
 Useful later: **9 Bus System** (Phases 3 and 7), **IEC 60909 Examples** (Phase 4), **LV Distribution Network** with its quasi-dynamic and hosting-capacity study cases (Phase 6).
 
-Still to do for Step 0.4: list the built-in tutorials (**Help → Tutorial…**).
+### Built-in tutorials (Help → Tutorial…)
+
+| Group | Lessons | Use in course |
+|---|---|---|
+| **Base Package: Getting Started** | PowerFactory Introduction · Create a Project and Build a Network · Carry out a Load Flow Calculation · Carry out a Short-Circuit Calculation | Do before Mini-project A (Step 2.5) |
+| Base Package: Cable Modelling | | Optional, Phase 2 |
+| Base Package: Working with PDF Reports | | Phase 8 report |
+| **Time Domain Simulation, RMS** | Definition of Dynamic Models · Time Domain Simulation (RMS) | Step 7.3 |
+| Dynamic Modelling (DSL, Modelica) | | Optional, after the course |
+| **Protection and Arc-Flash Analysis** | Overcurrent Protection · Distance Protection · Differential Protection · Create Relay Models · LVCB Model Modification · Arc Flash Hazard Analysis | Overcurrent Protection lesson for Step 5.3 |
+| Harmonics and Power Quality | | Optional, after the course |
+| **Scripting with Python in PowerFactory** | Introduction to Scripting with Python · Basic Python Scripting · Advanced Python Scripting · Additional Exercise 1 (time characteristics and plots) | Before Step 3.5 and Step 7.3 |
+| Scripting with DPL in PowerFactory | | Not needed (the course uses Python) |
+| Unbalanced Networks | | Optional, Phase 6 |
+| CGMES | | Not needed |
 
 ## PSCAD
 

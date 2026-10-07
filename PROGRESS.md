@@ -2,12 +2,12 @@
 
 Tick a box only when that step's **✅ Done when** checklist is fully true. Record the dates.
 
-Started on: ____ · Target finish (start + 26 weeks): ____
+Started on: 2026-10-07 · Target finish (start + 26 weeks): 2027-04-07
 
 ## Phase 0: Setup (week 1)
 - [ ] 0.1 Job-posting analysis → `career/job-postings.md`
 - [ ] 0.2 Python + pandapower runs
-- [ ] 0.3 GitHub portfolio repo skeleton
+- [x] 0.3 GitHub portfolio repo skeleton (Taio11k/power-systems-portfolio, private for now)
 - [ ] 0.4 Licence limits recorded; PSCAD first simulation + Fortran compiler OK
 - [ ] 0.5 Big picture SLD drawing, `GLOSSARY.md`, `LOG.md`
 
